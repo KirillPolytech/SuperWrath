@@ -1,43 +1,39 @@
 using UnityEngine;
 
-public class Fists : Gun
+[RequireComponent(typeof(Rigidbody))]
+public class Fists : MeleeWeapon
 {
-    [SerializeField] private float _distanceToAttack = 4f;
-    private HeroCamera _heroCamera;
-    private void Start()
+    [SerializeField] private HeroGunsController _heroGunsController;
+    private Rigidbody _rb;
+    private bool __isAttacking = false;
+    public bool IsAttacking { get { return __isAttacking; } }
+    private void Awake()
     {
-        _heroCamera = Camera.main.GetComponent<HeroCamera>();
+        gameObject.tag = "Gun";
+        _rb = GetComponent<Rigidbody>();
+        _rb.isKinematic = true;
+        GetComponent<BoxCollider>().isTrigger = true;
+        _heroGunsController = _parentGameObject.GetComponent<HeroGunsController>();
     }
-    public override void Attack()
+    private void Update()
     {
-        if (_heroCamera.GetHittedGameObjectOn3Meters() && _heroCamera.GetHittedGameObjectOn3Meters().CompareTag("Enemy"))
-        {
-            _heroCamera.GetHittedGameObjectOn3Meters().GetComponent<EnemyTemplate>().GetDamage(100);
-            Debug.Log("Deal Damage");
-        }
+        __isAttacking = _heroGunsController.IsAttacking;
     }
     public override string GetName()
     {
         return GetType().ToString();
     }
-
-    public override void BeingThrown(float throwingForce, Vector3 direction)
+    private void OnTriggerEnter(Collider other)
     {
-
+        if (other.gameObject.CompareTag("Enemy") && _heroGunsController.IsAttacking && _heroGunsController.GetMeleeWeapon.GetName() == "Fists")
+        {
+            other.gameObject.GetComponent<EnemyTemplate>().GetDamage(100);
+        }
     }
-
-    public override void ChangeColor(Color color)
-    {
-
-    }
-
-    public override void ReturnInitialColor()
-    {
-
-    }
-
-    public override void UnParent()
-    {
-        
-    }
+    public override void BeingThrown(float throwingForce, Vector3 direction) { }
+    public override void UnParent() { }
+    public override void Attack()        {    }
+    public override void SetParent(GameObject parent)    {    }
 }
+//private Animator _animator;
+//&& _animator.GetCurrentAnimatorClipInfo(0)[0].clip.name == "FistAttack")

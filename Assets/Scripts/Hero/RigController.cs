@@ -8,12 +8,16 @@ public class RigController : MonoBehaviour
     private TwoBoneIKConstraint __twoBoneIKConstraint;
     private Animator __playerAnimator;
 
-    private HeroControllerWithAnimations _hero;
+    private HeroController _hero;
+    private HeroGunsController _gunsController;
+    private void Awake()
+    {
+        _hero = FindObjectOfType<HeroController>();
+        _gunsController = FindObjectOfType<HeroGunsController>();
+        __playerAnimator = _hero.GetComponent<Animator>();
+    }
     private void Start()
     {
-        _hero = FindObjectOfType<HeroControllerWithAnimations>();
-        __playerAnimator = _hero.GetComponent<Animator>();
-
         __twoBoneIKConstraint = __rigLayer_RightHand.GetComponent<TwoBoneIKConstraint>();
         __twoBoneIKConstraint.data.target = __twoBoneIKConstraint.transform;
         __rigBuilder.Build();
@@ -21,10 +25,10 @@ public class RigController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (_hero.GetWeapon().GetName() == "Fists")
-            __twoBoneIKConstraint.weight = 0f;
-        else
+        if (_gunsController.GetProp || _gunsController.GetFireArmWeapon) // || _gunsController.GetMeleeWeapon.GetName() != "Fists")
             __twoBoneIKConstraint.weight = 1f;
+        else
+            __twoBoneIKConstraint.weight = 0f;
     }
     public void UpdatewoBoneIKConstraint(Transform __target)
     {
@@ -32,7 +36,7 @@ public class RigController : MonoBehaviour
         __rigBuilder.enabled = false;
         //
 
-        __twoBoneIKConstraint.data.target = __target;        
+        //__twoBoneIKConstraint.data.target = __target;
         __rigBuilder.Build();
         __playerAnimator.Rebind();
         __twoBoneIKConstraint.weight = 1f;

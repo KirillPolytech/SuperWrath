@@ -1,3 +1,5 @@
+using System.Drawing;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class ObjectTimeScale : MonoBehaviour
@@ -7,16 +9,22 @@ public class ObjectTimeScale : MonoBehaviour
     private Vector3 _initialAngularVelocity = Vector3.zero;
     public Vector3 GetVelocity { get { return _initialVelocity; } }
     public Vector3 GetAngularVelocity { get { return _initialAngularVelocity; } }
+
+    private ObjectsManager _objectsManager;
     private void Start()
     {
+        _objectsManager = FindObjectOfType<ObjectsManager>();
         _rb = GetComponent<Rigidbody>();
         _rb.useGravity = false;
-        _initialVelocity = Physics.gravity;
     }
     public void InitialVelocityAndAngularVelocity(Vector3 velocity, Vector3 angularVelocity)
     {
         _initialVelocity = velocity;
         _initialAngularVelocity = angularVelocity;
+
+        if (!_objectsManager)
+            _objectsManager = FindObjectOfType<ObjectsManager>();
+        _objectsManager.AddObjectToList(this);
     }
     public void SetTimeScale()
     {
@@ -24,9 +32,26 @@ public class ObjectTimeScale : MonoBehaviour
         _rb.angularVelocity = _initialAngularVelocity * TimeManager.GetTimeScale();
     }
 
+    private bool _isFreeze = false;
     private void FixedUpdate()
     {
-        //DecreaseVelocity();
+        DecreaseVelocity();
+
+        if (_isFreeze)
+        {
+            if (TimeManager.GetTimeScale() < 0.05f)
+            {
+                _rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+            else
+            {
+                _rb.constraints = RigidbodyConstraints.None;
+            }
+        }
+    }
+    public void TurnObjectConstaints( bool isOn)
+    {
+        _isFreeze = isOn;
     }
     private void DecreaseVelocity()
     {
@@ -34,7 +59,7 @@ public class ObjectTimeScale : MonoBehaviour
         {
             _initialVelocity = Vector3.Scale(_initialVelocity, new Vector3(0.99f, 1f, 0.99f));
 
-            if (_initialVelocity.y > Physics.gravity.y )
+            if (_initialVelocity.y > Physics.gravity.y)
             {
                 _initialVelocity = new Vector3(_initialVelocity.x, _initialVelocity.y + Physics.gravity.y * Time.fixedDeltaTime, _initialVelocity.z);
                 //Debug.Log(_initialVelocity.y);

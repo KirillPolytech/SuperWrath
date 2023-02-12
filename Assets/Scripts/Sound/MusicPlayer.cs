@@ -4,10 +4,10 @@ using UnityEngine;
 public class MusicPlayer : MonoBehaviour
 {
     private AudioSource _musicSource;
-    private HeroControllerWithAnimations _hero;
+    private HeroController _hero;
     private void Awake()
     {
-        _hero = FindObjectOfType<HeroControllerWithAnimations>();
+        _hero = FindObjectOfType<HeroController>();
 
         _musicSource = GetComponent<AudioSource>();
         _musicSource.playOnAwake = false;

@@ -3,7 +3,6 @@ using UnityEngine.AI;
 
 public abstract class EnemyTemplate : MonoBehaviour
 {
-    [SerializeField] protected Gun _gun;
     [SerializeField] protected float _delayBetweenAttacks = 0.5f;
     [SerializeField] protected float _maxSpeed = 1f;
     [SerializeField] protected float _fallVelocity = 10f;

@@ -4,7 +4,9 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Bullet : MonoBehaviour
 {
-    private static float _timeScale = 0f;
+    [SerializeField] private GameObject _collsionParticleGameObject;
+    [SerializeField] private GameObject _hitBodyGameObject;
+    [SerializeField] private GameObject _hitWallGameObject;
     private Rigidbody _rb;
     private Vector3 _initialVelocity = Vector3.zero;
     private Vector3 _initialAngularVelocity = Vector3.zero;
@@ -24,26 +26,38 @@ public class Bullet : MonoBehaviour
     }
     public void SetTimeScale()
     {
-        _timeScale = TimeManager.GetTimeScale();
-
-        _rb.velocity = _initialVelocity * _timeScale;
-        _rb.angularVelocity = _initialAngularVelocity * _timeScale;
+        _rb.velocity = _initialVelocity * TimeManager.GetTimeScale();
+        _rb.angularVelocity = _initialAngularVelocity * TimeManager.GetTimeScale();
     }
     private void OnCollisionEnter(Collision collision)
     {
-        _numberOfCollisions++;
+        if (collision.gameObject.CompareTag("Enemy") && _numberOfCollisions < 5)
+        {
+            _numberOfCollisions++;
+            _hitBodyGameObject.GetComponent<AudioSource>().Play();
+            return;
+        }
         //Debug.Log(collision.gameObject.name + "   " + transform.position );
 
 
         //ChangeDirectionOnCollision(collision);
+
+        _collsionParticleGameObject.transform.parent = null;
+        ParticleSystem _temp = _collsionParticleGameObject.GetComponent<ParticleSystem>();
+        ParticleSystem.MainModule _module = _collsionParticleGameObject.GetComponent<ParticleSystem>().main;
+        _module.playOnAwake = false;
+        _module.loop = false;
+        _temp.Play();
+
+        _hitWallGameObject.GetComponent<AudioSource>().Play();
 
         Destroy(gameObject);
     }
     private void ChangeDirectionOnCollision(Collision collision)
     {
         _initialVelocity = Vector3.Reflect(_initialVelocity, collision.GetContact(0).normal);
-        _rb.velocity = _initialVelocity * _timeScale;
-        _rb.angularVelocity = _initialAngularVelocity * _timeScale;
+        _rb.velocity = _initialVelocity * TimeManager.GetTimeScale();
+        _rb.angularVelocity = _initialAngularVelocity * TimeManager.GetTimeScale();
         transform.rotation = Quaternion.LookRotation(_initialVelocity);
     }
 }

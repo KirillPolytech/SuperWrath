@@ -1,36 +1,44 @@
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEditor;
 
 [RequireComponent(typeof(AudioSource))]
 [RequireComponent(typeof(NavMeshObstacle))]
 [RequireComponent(typeof(ObjectTimeScale))]
 [RequireComponent(typeof(Rigidbody))]
-public class Prop : MonoBehaviour
+public class Prop : MonoBehaviour, IChangeColor
 {
+    [SerializeField] private Vector3 _position = new Vector3(0.4f, 1f, 1f);
     private Rigidbody _rb;
     private NavMeshObstacle _navMeshObstacle;
     private ObjectTimeScale _objectTimeScale;
     private bool _isObjectDestroyed = false;
     public bool IsObjectDestroyed { get { return _isObjectDestroyed; } }
     private bool _isDestroyed = false;
+    public bool IsPropDestroyed { get { return _isDestroyed; } set { _isDestroyed = value; }   }
+    private Renderer _renderer;
+    private Color _initialColor;
+    private bool _isPickedUp = false;
     private void Awake()
     {
         gameObject.tag = "Prop";
-        gameObject.layer = 6;
+        gameObject.layer = 10;
 
         _navMeshObstacle = GetComponent<NavMeshObstacle>();
         _navMeshObstacle.size = new Vector3(0.001f, 0.001f, 0.007f); // new Vector3(0.005f, 0.0125f, 0.0125f)
 
         __dropSource = GetComponent<AudioSource>();
         __dropSource.playOnAwake = false;
-        //__dropSource.volume = SoundsVolume.GetSoundsVolume();
+        __dropSource.volume = SoundsVolume.GetSoundsVolume();
         __dropSource.volume = 0.05f;
         __dropSource.clip = Resources.Load<AudioClip>("Sounds\\DropSounds\\Drop");
 
         _objectTimeScale = GetComponent<ObjectTimeScale>();
         _rb = GetComponent<Rigidbody>();
         _rb.constraints = RigidbodyConstraints.FreezeAll;
+        _rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+        _renderer = GetComponent<Renderer>();
+        _initialColor = _renderer.material.color;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -66,14 +74,17 @@ public class Prop : MonoBehaviour
     private void FixedUpdate()
     {
         PlayDropSound();
-
-        if (TimeManager.GetTimeScale() == 0f)
+        if (_isDestroyed)
+        {
+            _rb.constraints = RigidbodyConstraints.None;
+        }else if(TimeManager.GetTimeScale() == 0f)
         {
             _rb.constraints = RigidbodyConstraints.FreezeAll;
         }
-        else if (_isDestroyed)
+
+        if (_isPickedUp && transform.localPosition != _position)
         {
-            _rb.constraints = RigidbodyConstraints.None;
+            transform.localPosition = Vector3.MoveTowards(transform.localPosition, _position, 0.2f);
         }
     }
 
@@ -97,7 +108,26 @@ public class Prop : MonoBehaviour
         }
         _delay += Time.fixedDeltaTime;
     }
+    public void BeingThrown(Vector3 direction, Vector3 angular, float __throwingForce)
+    {
+        _isPickedUp = false;
+        _objectTimeScale.InitialVelocityAndAngularVelocity(direction * __throwingForce + Physics.gravity * 0.1f, angular);
+    }
+
+    public void ChangeColor(Color color)
+    {
+        _renderer.material.color = color;
+    }
+    public void ReturnColor()
+    {
+        _renderer.material.color = _initialColor;
+    }
+    public void PickUp()
+    {
+        _isPickedUp = true;
+    }
 }
+
 
 
 /*
@@ -123,4 +153,15 @@ _initialVelocity = new Vector3(0, - 2f, 0); //G * Time.fixedDeltaTime * 10
 _rb = GetComponent<Rigidbody>();
 _rb.useGravity = false;
 _rb.constraints = RigidbodyConstraints.FreezeAll;
+*/
+
+/*
+if (TimeManager.GetTimeScale() == 0f)
+{
+    _rb.constraints = RigidbodyConstraints.FreezeAll;
+}
+else if (_isDestroyed)
+{
+    _rb.constraints = RigidbodyConstraints.None;
+}
 */

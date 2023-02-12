@@ -102,7 +102,7 @@ public class Enemy : MonoBehaviour
             GetDamage(100);
         }
     }
-    public void DealDamage(HeroControllerWithAnimations hero)
+    public void DealDamage(HeroController hero)
     {
         hero.GetDamage(100);
     }

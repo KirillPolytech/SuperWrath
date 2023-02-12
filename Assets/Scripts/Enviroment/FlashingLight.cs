@@ -6,17 +6,17 @@ public class FlashingLight : MonoBehaviour
     private Renderer _renderer;
     private Material _initialMaterial;
 
-    private float _maxColorValue = 2.55f, _minColorValue = 1f;
-    private float _colorValue = 0f, _timeValueChangeSpeed = 0.01f;
+    private float _maxColorValue = 2f, _minColorValue = 1f;
+    private float _colorValue = 0f;
     private bool _bigger = false;
     void Start()
     {
         _renderer = GetComponent<Renderer>();
         _emissionMaterial = _renderer.material;
         _initialMaterial = _emissionMaterial;
-        _colorValue = _initialMaterial.color.r;    
+        _colorValue = _minColorValue;    
     }
-    void FixedUpdate()
+    void Update()
     {
         ChangeEmissionMaterial();
     }
@@ -24,13 +24,13 @@ public class FlashingLight : MonoBehaviour
     {
         if (_colorValue < _maxColorValue && !_bigger)
         {
-            _colorValue += _timeValueChangeSpeed * TimeManager.GetTimeScale();
+            _colorValue += Time.deltaTime * TimeManager.GetTimeScale();
             DynamicGI.SetEmissive(_renderer, new Color(_colorValue, _colorValue, _colorValue, _colorValue));
         }
         else if (_colorValue >= _minColorValue)
         {
             _bigger = true;
-            _colorValue -= _timeValueChangeSpeed * TimeManager.GetTimeScale();
+            _colorValue -= Time.deltaTime * TimeManager.GetTimeScale();
             DynamicGI.SetEmissive(_renderer, new Color(_colorValue, _colorValue, _colorValue, _colorValue));
         }
         else
