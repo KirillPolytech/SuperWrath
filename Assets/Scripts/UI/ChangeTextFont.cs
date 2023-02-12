@@ -18,10 +18,10 @@ public class ChangeTextFont : MonoBehaviour
     private bool _nextText = false;
 
     [SerializeField]private AudioSource _superWrathSound;
-    private HeroControllerWithAnimations _hero;
+    private HeroController _hero;
     private void Awake()
     {
-        _hero = FindObjectOfType<HeroControllerWithAnimations>();
+        _hero = FindObjectOfType<HeroController>();
 
         _superWrathSound.playOnAwake = false;
         _superWrathSound.loop = true;

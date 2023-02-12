@@ -10,7 +10,8 @@ public class GameSystem : MonoBehaviour
     }
     private void Update()
     {
-        RestartLevel();
+        if (Input.GetButtonDown("R"))
+            RestartLevel();
         QuitGame();
     }
     private void QuitGame()
@@ -20,11 +21,8 @@ public class GameSystem : MonoBehaviour
             Application.Quit();
         }
     }
-    private void RestartLevel()
+    public void RestartLevel()
     {
-        if (Input.GetButtonDown("R"))
-        {
-            SceneManager.LoadScene("" + SceneManager.GetActiveScene().name);
-        }
+        SceneManager.LoadScene("" + SceneManager.GetActiveScene().name);
     }
 }
